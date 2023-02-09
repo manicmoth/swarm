@@ -1,6 +1,6 @@
 import cv2 as cv
 import numpy as np
-
+import os
 
 # example code from https://mlhive.com/2022/04/draw-on-images-using-mouse-in-opencv-python
 ix,iy,sx,sy = -1,-1,-1,-1
@@ -25,8 +25,10 @@ def draw_lines(event, x, y, flags, param):
         if flags == 33: # if alt key is pressed, create line between start and end points to create polygon
             cv.line(img, (x, y), (sx, sy), (0, 0, 127), 2, cv.LINE_AA)
 
+
+path = os.getcwd()
 # read image from path and add callback
-img = cv.resize(cv.imread("themefoxx (214).jpg"), (1280, 720))
+img = cv.resize(cv.imread(path+"/test_images/image.jpg"), (1280, 720))
 cv.namedWindow('image') 
 cv.setMouseCallback('image',draw_lines)
 
