@@ -9,12 +9,15 @@ import os
 # @return image marked up image  
 # @return coords
 
+# TODO: make a copy of the image to apply bounding box to, allowing for box redraw 
+#       + only apply markers to final image
+
 # example code from https://mlhive.com/2022/04/draw-on-images-using-mouse-in-opencv-python
 ix,iy,sx,sy = -1,-1,-1,-1
 
 points_ = []
-circles = False
-debug_mode = True
+circles = False # toggle between line tool and bounding box, True = bounding box
+debug_mode = True # toggle helpful print statements
 
 
 file_name = "savedImage.jpg"
@@ -99,6 +102,9 @@ else:
 cv.imwrite( file_name, img)
 if circles:
     print(f"{ix},{iy}\t{iix},{iiy}")
+else:
+    print(points_)
+          
 print("image saved")
 cv.destroyAllWindows()
 
