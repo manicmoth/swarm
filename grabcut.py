@@ -3,7 +3,6 @@
 # This tool is to be used with the selection tool
 import numpy as np
 import cv2 
-from matplotlib import pyplot as plt
 
 def grabcut(input_img, rect):
     """ 
@@ -14,7 +13,6 @@ def grabcut(input_img, rect):
 
     returns - cv2 img
     """
-    
     mask = np.zeros(input_img.shape[:2],np.uint8)
 
     bgdModel = np.zeros((1,65),np.float64)
