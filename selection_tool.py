@@ -1,99 +1,126 @@
 import cv2 as cv
-import numpy as np
-import os
-import copy
+from getopt import getopt
+from sys import argv, exit
+from os import getcwd
+from copy import deepcopy 
 
-# Function takes in an image, allows selection of the subject and defining 
-# inclusions & exclusions
-# currently searches for image at img "image.jpg" and uses it as the canvas 
-# @param image input photo 
-# @return "savedImage.jpg" image marked up image  
-# @return rect_coords nested tuple of coords
-
+# first crack at refactoring selection tool code.
+# TODO: implement grabcad and watershed options
 # TODO parameterize to accept image thrown at it
 #      parameterize image size, to be standard (1080p)
 
-# TODO Refactor code into class
 
-color = True
+class segmenter():
+    def __init__(self):
+        
+        self.color = True
+        #example code: https://mlhive.com/2022/04/draw-on-images-using-mouse-in-opencv-python
+        self.ix = -1
+        self.iy = -1
+        self.debug_mode = False  # toggle helpful print statements
+        self.drawing = False     # System state variable 
+        self.mode = False 
+        self.colors = [( 0, 0, 0),
+                  ( 255, 255, 255)]
+        # read image from path and add callback
 
-# example code from https://mlhive.com/2022/04/draw-on-images-using-mouse-in-opencv-python
-ix,iy = -1,-1
+    def setup(self,img_name="image.jpg", size=(960,540), save_name="savedImage.jpg", path=getcwd()+"/img/" ):
+        # img_name - name of the image that we will be manipulating
+        # Size - tuple of dimensions we will resize our image to
+        # Save image name - name for our new image
+        # Path - Path to image
+        
+        self.file_name = save_name
+        self.path = path
+        self.file_name = self.path + self.file_name
+        i = cv.imread(self.path + img_name)
+        self.img = cv.resize(i, size)                # Resize image
+        #self.img = np.zeros((512,512,3), np.uint8)
+        self.cache = self.img
+        self.rect_coords = ((-1,-1),(-1,-1))
 
-debug_mode = False  # toggle helpful print statements
-drawing = False     # System state variable 
-mode = False        # 
-file_name = "savedImage.jpg"
-path = os.getcwd() + "/img/"
-file_name = path  +file_name
-colors = [( 0, 0, 0),
-          ( 255, 255, 255)]
-# read image from path and add callback
-img = cv.imread(path + "image.jpg")
-#img = np.zeros((512,512,3), np.uint8)
-cache = img
-rect_coords = ((-1,-1),(-1,-1))
-
-def draw_circle(event,x,y,flags,param):
-    global ix,iy,drawing,mode
-    global rect_coords 
-    global img 
-    global cache
-     
-    if event == cv.EVENT_LBUTTONDOWN:
-        drawing = True
-        ix,iy = x,y
-
-    elif event == cv.EVENT_MOUSEMOVE:
-        if drawing == True:
-            if mode == True:
-                pass
-                #cv.rectangle(img,(ix,iy),(x,y),(0,255,0),2)
-            else:
-                if cache.any():
-                    img = copy.deepcopy(cache)
-                cv.circle(img,(x,y),5,colors[color],-1) 
-                cache = copy.deepcopy(img)
-                if type(rect_coords) is tuple:
-                    cv.rectangle(img,rect_coords[0],rect_coords[1],(0,255,0),1)
-
-    elif event == cv.EVENT_LBUTTONUP:
-        drawing = False
-        if mode == True: 
-            rect_coords = ((x,y),(ix,iy))
+    def painter(self,event,x,y,flags,param) -> None:
+         
+        if event == cv.EVENT_LBUTTONDOWN:
+            self.drawing = True
+            self.ix,self.iy = x,y
             
-            if cache.any():
-                img = copy.deepcopy(cache)
-            else:
-                print("WTC _ rect")
-                cache = copy.deepcopy(img)
-           
-            cv.rectangle(img,(ix,iy),(x,y),(0,255,0),1)
+        elif event == cv.EVENT_MOUSEMOVE:
+            if self.drawing == True:
+                if self.mode == True:
+                    pass
+                    #cv.rectangle(img,(ix,iy),(x,y),(0,255,0),2)
+                else:
+                    if self.cache.any():
+                        self.img = copy.deepcopy(self.cache)
+                    cv.circle(self.img,(x,y),5,self.colors[self.color],-1) 
+                    self.cache = copy.deepcopy(self.img)
+                    if type(self.rect_coords) is tuple:
+                        cv.rectangle(self.img,self.rect_coords[0],self.rect_coords[1],(0,255,0),1)
             
-            if debug_mode:
-                print(f"RECTANGLE:\t({ix},{iy})\n \t\t({x},{y})")
-        else:
-            cv.circle(img,(x,y),5,colors[color],-1)
-    
-if debug_mode:
-    print(file_name)
-cv.namedWindow('image')
-c = cv.setMouseCallback('image',draw_circle)
+        elif event == cv.EVENT_LBUTTONUP:
+            self.drawing = False
+            if self.mode == True: 
+                self.rect_coords = ((x,y),(self.ix,self.iy))
+                
+                if self.cache.any():
+                    self.img = copy.deepcopy(self.cache)
+                else:
+                    print("WTC _ rect")
+                    self.cache = copy.deepcopy(self.img)
+               
+                cv.rectangle(self.img,(self.ix,self.iy),(x,y),(0,255,0),1)
+                
+                if self.debug_mode:
+                    print(f"RECTANGLE:\t({self.ix},{self.iy})\n \t\t({x},{y})")
+            else:
+                cv.circle(self.img,(x,y),5,self.colors[self.color],-1)
 
-while(1):
-    cv.imshow('image',img)
-    k = cv.waitKey(1) & 0xFF
-    #print(f"{ix}{iy}")
-    if k == ord('m'):
-        mode = not mode
-    elif k == ord('c'):
-        color = not color
-    elif k == 27:
-        break
-  
-cv.imwrite( file_name, cache)
+    def run(self):
+        # look into using decorators to pass functions to be run at differnet 
+        # points, such as which segmenter
+        
+        if self.debug_mode:
+            print(self.file_name)
+        cv.namedWindow('Painter')
+        self.c = cv.setMouseCallback('Painter',self.painter)
+        
+        while(1):
+            cv.imshow('image',self.img)
+            self.k = cv.waitKey(1) & 0xFF
+            #print(f"{ix}{iy}")
+            if self.k == ord('m'):
+                # toggling mode between rectangle and paint
+                self.mode = not self.mode
+            elif self.k == ord('c'):
+                # toggling color to be applied to mouse press
+                self.color = not self.color
+            elif self.k == 27:
+                break
 
-print("image saved")
-cv.destroyAllWindows()
-print(rect_coords)
+def handle_args(argv):
+    #img_name, size, save_name, path ):
+    opts, args = getopt(argv,"him:s:sn:p",["imgname=","size=","savename=","path="])
+    new_defaults = {}
+    for opt, arg in opts:
+        if opt == '-h':
+            print('selection_tool.py -im <imgname> -s <size> -sn <newimgname> -p <path>')
+            exit()
+        elif opt in ("-im", "--imgname"):
+            new_defaults["img_name"]= arg
+        elif opt in ("-s", "--size"):
+            new_defaults["size"] = tuple(eval(arg))
+        elif opt in ("-sn", "--savename"):
+            new_defaults["save_name"] = arg
+        elif opt in ("-p", "--path"):
+            new_defaults["path"] = arg
+    return new_defaults
+
+if __name__ == "__main__":
+    manual = segmenter()
+    print("Segmenter Initialized")
+    manual.setup(**handle_args(argv))
+    manual.run()
+
+
 
