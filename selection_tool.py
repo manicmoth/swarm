@@ -11,8 +11,11 @@ from copy import deepcopy
 
 
 class segmenter():
-    def __init__(self):
-        
+    def __init__(self,img_name="image.jpg", img_path=getcwd()+"/img/", output_size=(960,540), output_name="savedImage.jpg"):
+        # img_name - name of the image that we will be manipulating
+        # Size - tuple of dimensions we will resize our image to
+        # Save image name - name for our new image
+        # Path - Path to image
         self.color = True
         #example code: https://mlhive.com/2022/04/draw-on-images-using-mouse-in-opencv-python
         self.ix = -1
@@ -23,38 +26,32 @@ class segmenter():
         self.colors = [( 0, 0, 0),
                   ( 255, 255, 255)]
         # read image from path and add callback
-
-    def setup(self,img_name="image.jpg", size=(960,540), save_name="savedImage.jpg", path=getcwd()+"/img/" ):
-        # img_name - name of the image that we will be manipulating
-        # Size - tuple of dimensions we will resize our image to
-        # Save image name - name for our new image
-        # Path - Path to image
-        
-        self.file_name = save_name
-        self.path = path
-        self.file_name = self.path + self.file_name
-        i = cv.imread(self.path + img_name)
-        self.img = cv.resize(i, size)                # Resize image
+        self.file_name = img_name
+        self.path = img_path + img_name
+        i = cv.imread(self.path)
+        self.img = cv.resize(i, output_size)                # Resize image
         #self.img = np.zeros((512,512,3), np.uint8)
         self.cache = self.img
         self.rect_coords = ((-1,-1),(-1,-1))
+        self.k = None
 
     def painter(self,event,x,y,flags,param) -> None:
-         
+        print("funcall")
         if event == cv.EVENT_LBUTTONDOWN:
             self.drawing = True
             self.ix,self.iy = x,y
             
         elif event == cv.EVENT_MOUSEMOVE:
+            print("drawingdrawing")
             if self.drawing == True:
                 if self.mode == True:
                     pass
                     #cv.rectangle(img,(ix,iy),(x,y),(0,255,0),2)
                 else:
                     if self.cache.any():
-                        self.img = copy.deepcopy(self.cache)
+                        self.img = deepcopy(self.cache)
                     cv.circle(self.img,(x,y),5,self.colors[self.color],-1) 
-                    self.cache = copy.deepcopy(self.img)
+                    self.cache = deepcopy(self.img)
                     if type(self.rect_coords) is tuple:
                         cv.rectangle(self.img,self.rect_coords[0],self.rect_coords[1],(0,255,0),1)
             
@@ -64,10 +61,10 @@ class segmenter():
                 self.rect_coords = ((x,y),(self.ix,self.iy))
                 
                 if self.cache.any():
-                    self.img = copy.deepcopy(self.cache)
+                    self.img = deepcopy(self.cache)
                 else:
                     print("WTC _ rect")
-                    self.cache = copy.deepcopy(self.img)
+                    self.cache = deepcopy(self.img)
                
                 cv.rectangle(self.img,(self.ix,self.iy),(x,y),(0,255,0),1)
                 
@@ -83,11 +80,14 @@ class segmenter():
         if self.debug_mode:
             print(self.file_name)
         cv.namedWindow('Painter')
-        self.c = cv.setMouseCallback('Painter',self.painter)
+        cv.setMouseCallback('Painter',self.painter)
+
         
         while(1):
+            print(self.k)
             cv.imshow('image',self.img)
             self.k = cv.waitKey(1) & 0xFF
+            print(self.k)
             #print(f"{ix}{iy}")
             if self.k == ord('m'):
                 # toggling mode between rectangle and paint
@@ -117,9 +117,9 @@ def handle_args(argv):
     return new_defaults
 
 if __name__ == "__main__":
-    manual = segmenter()
+    manual = segmenter("gaya.png",)
     print("Segmenter Initialized")
-    manual.setup(**handle_args(argv))
+    # manual.setup(**handle_args(argv))
     manual.run()
 
 
