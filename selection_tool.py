@@ -9,9 +9,8 @@ from copy import deepcopy
 # TODO parameterize to accept image thrown at it
 #      parameterize image size, to be standard (1080p)
 
-
 class segmenter():
-    def __init__(self,img_name="image.jpg", img_path=getcwd()+"/img/", output_size=(960,540), output_name="savedImage.jpg"):
+    def __init__(self,img_name="image.png", img_path=getcwd()+"/img/", output_size=(960,540), output_name="savedImage.jpg"):
         # img_name - name of the image that we will be manipulating
         # Size - tuple of dimensions we will resize our image to
         # Save image name - name for our new image
@@ -35,14 +34,14 @@ class segmenter():
         self.rect_coords = ((-1,-1),(-1,-1))
         self.k = None
 
-    def painter(self,event,x,y,flags,param) -> None:
-        print("funcall")
+    def painter(self,event,x,y,flags,param) -> None:  
+        if self.debug_mode:
+            print(f"flags {flags} \t event {event}")
         if event == cv.EVENT_LBUTTONDOWN:
             self.drawing = True
             self.ix,self.iy = x,y
             
         elif event == cv.EVENT_MOUSEMOVE:
-            print("drawingdrawing")
             if self.drawing == True:
                 if self.mode == True:
                     pass
@@ -85,7 +84,7 @@ class segmenter():
         
         while(1):
             print(self.k)
-            cv.imshow('image',self.img)
+            cv.imshow('Painter',self.img)
             self.k = cv.waitKey(1) & 0xFF
             print(self.k)
             #print(f"{ix}{iy}")
@@ -109,15 +108,15 @@ def handle_args(argv):
         elif opt in ("-im", "--imgname"):
             new_defaults["img_name"]= arg
         elif opt in ("-s", "--size"):
-            new_defaults["size"] = tuple(eval(arg))
-        elif opt in ("-sn", "--savename"):
-            new_defaults["save_name"] = arg
+            new_defaults["output_size"] = tuple(eval(arg))
+        elif opt in ("-o", "--outputname"):
+            new_defaults["output_name"] = arg
         elif opt in ("-p", "--path"):
-            new_defaults["path"] = arg
+            new_defaults["img_path"] = arg
     return new_defaults
 
 if __name__ == "__main__":
-    manual = segmenter("gaya.png",)
+    manual = segmenter(**handle_args(argv))
     print("Segmenter Initialized")
     # manual.setup(**handle_args(argv))
     manual.run()
