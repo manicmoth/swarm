@@ -54,9 +54,9 @@ class FullScreen_HB:
         self.y = self.monitor.y
         self.name = str(screen_id)
         print(self.x, " ",self.y)
-        cv.namedWindow(self.name)
+        cv.namedWindow(self.name, cv.WINDOW_NORMAL)
         cv.moveWindow(self.name, self.x, self.y)
-        cv.setWindowProperty(self.name,cv.WND_PROP_FULLSCREENcv.WINDOW_NORMAL)
+        cv.setWindowProperty(self.name,cv.WND_PROP_FULLSCREEN,cv.WINDOW_NORMAL)
         cv.resizeWindow(self.name, self.width, self.height)
         cv.setWindowProperty(self.name, cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
 
