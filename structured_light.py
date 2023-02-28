@@ -1,60 +1,57 @@
-import structuredlight as sl
 import cv2 as cv
 from os import getcwd
 # TODO mark these new libraries as dependencies
 import laspy as lp
-#import liblas
+import structuredlight as sl
+from fullscreen import FullScreen
 import tkinter as tk
+import time
 from PIL import Image, ImageTk
 
 # Tkinter example code
 ## example of using opencv array as tkimage:
 ## https://stackoverflow.com/questions/28670461/read-an-image-with-opencv-and-display-it-with-tkinter
 
-width  = 640
-height = 480
+#width  = 640
+#height = 480
 
-class SL_Scanner(tk.Tk):
-    def __init__(self, width, height):
-        self.counter = 0
-        tk.Tk.__init__(self)
-        tk.Tk.title(self,"Structued light demo")
-        tk.Tk.geometry(self,f"{width}x{height}")
+class SL_Scanner():
+    def __init__(self,):
+        self.counter = 0        
+        self.screen = FullScreen()
+        self.width, self.height, self.ch = self.screen.shape
         # genetate structured light frames
         self.gray = sl.Gray() 
         self.imglist = []    
-        self.imlist_pattern = self.gray.generate((width, height))
-        for c,v in enumerate(self.imlist_pattern):
-            self.imglist.append(ImageTk.PhotoImage(Image.fromarray(v)))
-            print(f"image {c} converted")
+        self.imlist_pattern = self.gray.generate((self.width, self.height))
+        self.img_index = []
+        self.captures = self.scan(self.screen, self.imlist_pattern)
+        self.decode_captures(self.captures)
+
+    def scan(self, scr, il):
+        captures = []
         
-        self.imageLabel = tk.Label(self, image=self.imglist[0])
-        self.infoLabel = tk.Label(self, text=f"Image 0 of {len(self.imglist)}", font="Helvetica, 20")    
-        self.imageLabel.pack()
-        self.infoLabel.pack()
-        self.update_image()
+        cam = cv.VideoCapture(0) # device to capture
+        for c,img in enumerate(il):
+            scr.imshow(img)
+            # TODO take photo, NEEDS TO BE TESTED 
+            ret, frame = cam.read()
+            cv.imwrite(f"img/c{c}.png",frame)
+            time.sleep(.1) 
+        cam.release()
+        return captures
 
-    def update_image(self):    
-        if self.counter < len(self.imglist) - 1:
-            self.counter += 1
-        else:
-            self.counter = 0
-        self.imageLabel.config(image=self.imglist[self.counter])
-        self.infoLabel.config(text="Image " + str(self.counter + 1) + " of " + str(len(self.imglist)))
-        self.after(1000,self.update_image)
+    def decode_captures(self, caps): 
 
-def decode_captures():
-    #    imlist_captured = imlist_pattern
-    #
-    #    img_index = gray.decode(imlist_captured, thresh=127)
-    #
-    #    print(img_index)
-    pass
+        img_index = []
+        for i in caps:
+            img_index.append(self.gray.decode(i, thresh=127))
+        
+        print(img_index)
 
 
 if __name__== "__main__":
-    app = SL_Scanner(width, height)
-    app.mainloop()
+    app = SL_Scanner()
 
 
 
