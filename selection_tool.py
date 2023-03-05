@@ -4,13 +4,11 @@ from sys import argv, exit
 from os import getcwd
 from copy import deepcopy 
 
-# first crack at refactoring selection tool code.
-# TODO: implement grabcad and watershed options
 # TODO parameterize to accept image thrown at it
 #      parameterize image size, to be standard (1080p)
 
-class segmenter():
-    def __init__(self,img_name="image.png", img_path=getcwd()+"/img/", output_size=(960,540), output_name="savedImage.jpg"):
+class SelectionTool():
+    def __init__(self,img_name="image.png", img_path=getcwd()+"/img/", output_size=(1080,1920), output_name="savedImage.jpg"):
         # img_name - name of the image that we will be manipulating
         # Size - tuple of dimensions we will resize our image to
         # Save image name - name for our new image
@@ -116,8 +114,9 @@ def handle_args(argv):
     return new_defaults
 
 if __name__ == "__main__":
-    manual = segmenter(**handle_args(argv))
-    print("Segmenter Initialized")
+    manual = SelectionTool()
+    #manual = segmenter(**handle_args(argv))
+    print("Manual Selection Initialized")
     # manual.setup(**handle_args(argv))
     manual.run()
 
