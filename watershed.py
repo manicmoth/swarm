@@ -47,7 +47,7 @@ class WatershedSegmenter():
         self.markers +=1
         
         self.markers[self.unknown==255]=0
-        
+        #TODO: look into handling multiple markers -
         self.markers = cv.watershed(self.img,self.markers)
         self.img[markers == -1] = [255,0,0]
         
