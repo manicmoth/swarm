@@ -9,7 +9,7 @@ class Operation(Enum):
     
 
 class Image_Layer():
-    def __init__(self, image=None, mask=None, operation_type=Operation.RESIZE_STRETCH, name = None) -> None:
+    def __init__(self, image=None, mask=None, operation_type=Operation.RESIZE_PADDING, name = None) -> None:
         """
         image - cv2 image to be masked
         mask - binary array to apply to image
@@ -17,10 +17,13 @@ class Image_Layer():
         """
         self.operation_type = operation_type
         self.image = image
-        
+
         self.mask = None
         if not(mask is None):
-            self.mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+            if len(mask.shape) == 3:
+                self.mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+            else:
+                self.mask = mask
 
         if not(image is None) and not(mask is None):
             self.output_image = None
@@ -29,6 +32,8 @@ class Image_Layer():
             elif self.operation_type == Operation.RESIZE_PADDING:
                 print("out")
                 self.output_image = self.resize_padding()  
+        else:
+            self.output_image = None
    
         if name:
             self.name = name
@@ -61,6 +66,11 @@ class Image_Layer():
         """
         Returns image with mask applied as defined by operation type
         """
+        if self.output_image is None:
+            if self.image is None:
+                return None
+            else:
+                return self.image
         return self.output_image
     
     def update_image(self, new_img):
@@ -79,7 +89,10 @@ class Image_Layer():
         """
         Applies new mask to image
         """
-        self.mask = cv2.cvtColor(new_mask, cv2.COLOR_BGR2GRAY)
+        if len(new_mask.shape) == 3:
+            self.mask = cv2.cvtColor(new_mask, cv2.COLOR_BGR2GRAY)
+        else:
+            self.mask = new_mask
         if not(self.image is None):
             if self.operation_type == Operation.RESIZE_STRETCH:
                 self.output_image = self.resize_stretch()
@@ -117,10 +130,10 @@ class Video_Layer():
         Spapes image to mask by smaller dimension and adds padding        
         """
         if frame.shape[0]/self.image.shape[1] > self.mask.shape[0]/self.mask.shape[1]:
-             output = cv2.resize(frame, [int(self.mask.shape[1]*(self.mask.shape[0]/frame.shape[0])), frame.shape[0]])
+            output = cv2.resize(frame, [int(self.mask.shape[1]*(self.mask.shape[0]/frame.shape[0])), frame.shape[0]])
 
         else:
-             output = cv2.resize(frame, [self.mask.shape[1], int(frame.shape[0]*(self.mask.shape[1]/frame.shape[1]))])
+            output = cv2.resize(frame, [self.mask.shape[1], int(frame.shape[0]*(self.mask.shape[1]/frame.shape[1]))])
         output = cv2.copyMakeBorder(output, (self.mask.shape[0] - output.shape[0])//2, ceil((self.mask.shape[0] - output.shape[0])/2), (self.mask.shape[1] - output.shape[1])//2, ceil((self.mask.shape[1] - output.shape[1])/2), cv2.BORDER_CONSTANT,value=[1,1,1])
         output[self.mask == 0] = (0,0,0)
         return output

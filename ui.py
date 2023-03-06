@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter.filedialog import askopenfilename
 from layer import Image_Layer
 import cv2 as cv
+from PIL import ImageTk, Image  
+import numpy as np 
 
 class UserInterface():
     def __init__(self) -> None:
@@ -20,6 +22,15 @@ class UserInterface():
         self.label_output = tk.Label(master=self.frame_output, text=f"Space for background image")
         self.label_output.pack()
 
+        self.button_choose_background = tk.Button(master=self.frame_output, text="Choose Background Image", command=self.choose_background_callback)
+        
+        output_image = cv.imread("img/default_img.png")
+        self.background_layer = Image_Layer(image=output_image)
+
+        output_image = ImageTk.PhotoImage(Image.fromarray(output_image))
+        self.label_output_image = tk.Label(master=self.frame_output, image=output_image)
+        self.label_output_image.pack()
+
         self.frame_label = tk.Frame(
             master=self.window,
             relief=tk.RAISED,
@@ -34,7 +45,7 @@ class UserInterface():
 
         self.layers = []
         self.new_layer = None
-
+   
         self.window_new_layer = None
         self.button_layer_image = None 
         self.button_layer_mask = None
@@ -42,6 +53,11 @@ class UserInterface():
         self.button_cancel_new_layer = None
 
         self.window.mainloop()
+
+    def choose_background_callback(self):
+        im_path = self.open_image()
+        im = cv.imread(im_path)
+        self.background_layer.update_image(im)
 
 
     def new_layer_callback(self):
@@ -86,7 +102,10 @@ class UserInterface():
         image = cv.imread(filename)
         self.new_layer.update_image(image)
         name = filename.split("/")[-1].split(".")[0]
+        if name == None:
+            name = f"layer{len(self.layers)}"
         self.new_layer.set_name(name)
+        print("add new layer - name", self.new_layer.name)
         label_name = filename.split("/")[-1]
         label = tk.Label(master=self.window_new_layer, text=f"Layer image: {label_name}")
         label.pack()
@@ -105,12 +124,40 @@ class UserInterface():
     
     def add_new_layer_callback(self):
         self.layers.append(self.new_layer)
+        print("does layer have name??? - ", self.new_layer.name, self.layers[-1].name)
         label_layer = tk.Label(master=self.frame_label, text=self.new_layer.name)
         label_layer.pack()
         self.new_layer = None
+        self.update_background_callback()
+        self.window_new_layer.destroy()
 
+    def update_background_callback(self):
+        output_mask = cv.imread("img/black_image.png")
+        output_mask = cv.cvtColor(output_mask, cv.COLOR_BGR2GRAY)
+        print(output_mask.shape, "OUTPUT MASK SHAPE")
+        if len(self.layers) > 0:
+            output_mask = cv.resize(output_mask, [self.layers[0].mask.shape[1], self.layers[0].mask.shape[0]])
+            for layer in self.layers:
+                mask = cv.resize(layer.mask, [self.layers[0].mask.shape[1], self.layers[0].mask.shape[0]])
+                output_mask = np.add(output_mask, mask)
+        output_mask = np.logical_not(output_mask).astype(int)
+        self.background_layer.update_mask(output_mask)
+        output = self.sum_images()
+        pil_output = ImageTk.PhotoImage(Image.fromarray(cv.cvtColor(output, cv.COLOR_BGR2RGB)))
+        
+        self.label_output_image.configure(image=pil_output)
+        self.label_output_image.image=pil_output
+
+    def sum_images(self):
+        output = cv.imread("img/black_image.png")
+        if len(self.layers) > 0:
+            output = cv.resize(output, [self.layers[0].mask.shape[1], self.layers[0].mask.shape[0]])
+        for layer in self.layers:
+            image = cv.resize(layer.get_masked_img(), [self.layers[0].mask.shape[1], self.layers[0].mask.shape[0]])
+            output = np.add(output, image)
+        output = np.add(output, self.background_layer.get_masked_img())
+        return output
 
 if __name__ == "__main__":
-    print("hihihi")
     ui = UserInterface()
     print(ui.layers)
