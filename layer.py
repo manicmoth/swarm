@@ -9,21 +9,31 @@ class Operation(Enum):
     
 
 class Image_Layer():
-    def __init__(self, image, mask, operation_type=Operation.RESIZE_STRETCH) -> None:
+    def __init__(self, image=None, mask=None, operation_type=Operation.RESIZE_STRETCH, name = None) -> None:
         """
         image - cv2 image to be masked
         mask - binary array to apply to image
         operation_type - how the image is related to the mask - see Operation for possible types
         """
-        self.image = image
-        self.mask = mask
         self.operation_type = operation_type
-        self.output_image = None
-        if self.operation_type == Operation.RESIZE_STRETCH:
-            self.output_image = self.resize_stretch()
-        elif self.operation_type == Operation.RESIZE_PADDING:
-            print("out")
-            self.output_image = self.resize_padding()
+        self.image = image
+        
+        self.mask = None
+        if not(mask is None):
+            self.mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+
+        if not(image is None) and not(mask is None):
+            self.output_image = None
+            if self.operation_type == Operation.RESIZE_STRETCH:
+                self.output_image = self.resize_stretch()
+            elif self.operation_type == Operation.RESIZE_PADDING:
+                print("out")
+                self.output_image = self.resize_padding()  
+   
+        if name:
+            self.name = name
+        else:
+            self.name = None
 
     def resize_stretch(self):
         """
@@ -53,16 +63,31 @@ class Image_Layer():
         """
         return self.output_image
     
+    def update_image(self, new_img):
+        """
+        Get new image and apply mask if available
+        """
+        self.image = new_img
+        if not(self.mask is None):
+            if self.operation_type == Operation.RESIZE_STRETCH:
+                self.output_image = self.resize_stretch()
+            elif self.operation_type == Operation.RESIZE_PADDING:
+                self.output_image = self.resize_padding()
+
+    
     def update_mask(self, new_mask):
         """
         Applies new mask to image
         """
-        self.mask = new_mask
-        if self.operation_type == Operation.RESIZE_STRETCH:
-            self.output_image = self.resize_stretch()
-        elif self.operation_type == Operation.RESIZE_PADDING:
-            self.output_image = self.resize_padding()
+        self.mask = cv2.cvtColor(new_mask, cv2.COLOR_BGR2GRAY)
+        if not(self.image is None):
+            if self.operation_type == Operation.RESIZE_STRETCH:
+                self.output_image = self.resize_stretch()
+            elif self.operation_type == Operation.RESIZE_PADDING:
+                self.output_image = self.resize_padding()
 
+    def set_name(self, name):
+        self.name = name
 
 
 
