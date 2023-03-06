@@ -55,6 +55,13 @@ class WatershedSegmenter():
         # img should have borders between objects defined 
         return self.img, self.markers
 
-
-
+    def markers2masks(self, im, marks):
+        # TODO: This function should take in a list of markers and an img, with
+        # # the colored markers superimposed onto the image, then create separate
+        # # masks for region that is indexed with each marker, and return this 
+        # # list of masks
+        # # ie 
+        # # im_1 is an image with 5 distinct pennies, each indexed with a differnet marker
+        # # marks_1 is a list of marker indexs(?)
+        pass
 
