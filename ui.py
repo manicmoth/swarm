@@ -23,7 +23,8 @@ class UserInterface():
         self.label_output.pack()
 
         self.button_choose_background = tk.Button(master=self.frame_output, text="Choose Background Image", command=self.choose_background_callback)
-        
+        self.button_choose_background.pack()
+
         output_image = cv.imread("img/default_img.png")
         self.background_layer = Image_Layer(image=output_image)
 
@@ -58,12 +59,14 @@ class UserInterface():
         im_path = self.open_image()
         im = cv.imread(im_path)
         self.background_layer.update_image(im)
+        self.update_background_callback()
 
 
     def new_layer_callback(self):
         """
         popup new layer definition
         """
+        self.button_new_layer["state"] = "disabled"
         self.window_new_layer=tk.Toplevel(self.window)
         self.window_new_layer.geometry("400x200")
         self.window_new_layer.title("New Layer")
@@ -105,7 +108,6 @@ class UserInterface():
         if name == None:
             name = f"layer{len(self.layers)}"
         self.new_layer.set_name(name)
-        print("add new layer - name", self.new_layer.name)
         label_name = filename.split("/")[-1]
         label = tk.Label(master=self.window_new_layer, text=f"Layer image: {label_name}")
         label.pack()
@@ -116,6 +118,7 @@ class UserInterface():
     def close_new_layer_callback(self):
         self.new_layer = None
         self.window_new_layer.destroy()
+        self.button_new_layer["state"] = "normal"
 
 
     def open_image(self, title = "Choose an image"):
@@ -124,17 +127,17 @@ class UserInterface():
     
     def add_new_layer_callback(self):
         self.layers.append(self.new_layer)
-        print("does layer have name??? - ", self.new_layer.name, self.layers[-1].name)
         label_layer = tk.Label(master=self.frame_label, text=self.new_layer.name)
         label_layer.pack()
         self.new_layer = None
         self.update_background_callback()
         self.window_new_layer.destroy()
+        self.button_new_layer["state"] = "normal"
+
 
     def update_background_callback(self):
         output_mask = cv.imread("img/black_image.png")
         output_mask = cv.cvtColor(output_mask, cv.COLOR_BGR2GRAY)
-        print(output_mask.shape, "OUTPUT MASK SHAPE")
         if len(self.layers) > 0:
             output_mask = cv.resize(output_mask, [self.layers[0].mask.shape[1], self.layers[0].mask.shape[0]])
             for layer in self.layers:
@@ -143,10 +146,14 @@ class UserInterface():
         output_mask = np.logical_not(output_mask).astype(int)
         self.background_layer.update_mask(output_mask)
         output = self.sum_images()
-        pil_output = ImageTk.PhotoImage(Image.fromarray(cv.cvtColor(output, cv.COLOR_BGR2RGB)))
+
+        resize_pil = Image.fromarray(cv.cvtColor(output, cv.COLOR_BGR2RGB))
+        size = (self.frame_output.winfo_width(), self.frame_output.winfo_height())
+        resize_pil.thumbnail(size)
+        resize_pil = ImageTk.PhotoImage(resize_pil)
         
-        self.label_output_image.configure(image=pil_output)
-        self.label_output_image.image=pil_output
+        self.label_output_image.configure(image=resize_pil)#pil_output)
+        self.label_output_image.image=resize_pil#pil_output
 
     def sum_images(self):
         output = cv.imread("img/black_image.png")
@@ -160,4 +167,3 @@ class UserInterface():
 
 if __name__ == "__main__":
     ui = UserInterface()
-    print(ui.layers)
