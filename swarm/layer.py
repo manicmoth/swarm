@@ -1,7 +1,7 @@
 from enum import Enum
 import cv2
 from copy import deepcopy
-from math import ceil
+from math import ceil, floor
  
 class Operation(Enum):
     RESIZE_STRETCH = 0
@@ -30,7 +30,6 @@ class Image_Layer():
             if self.operation_type == Operation.RESIZE_STRETCH:
                 self.output_image = self.resize_stretch()
             elif self.operation_type == Operation.RESIZE_PADDING:
-                print("out")
                 self.output_image = self.resize_padding()  
         else:
             self.output_image = None
@@ -53,14 +52,35 @@ class Image_Layer():
         Spapes image to mask by smaller dimension and adds padding        
         """
         #height/width
-        if self.image.shape[0]/self.image.shape[1] > self.mask.shape[0]/self.mask.shape[1]:
-             output = cv2.resize(self.image, [int(self.mask.shape[1]*(self.mask.shape[0]/self.image.shape[0])), self.image.shape[0]])
+        # if self.image.shape[0]/self.image.shape[1] > self.mask.shape[0]/self.mask.shape[1]:
+        #     output = cv2.resize(self.image, [int(self.mask.shape[1]*(self.mask.shape[0]/self.image.shape[0])), self.image.shape[0]])
+        # else:
+        #     output = cv2.resize(self.image, [self.mask.shape[1], int(self.image.shape[0]*(self.mask.shape[1]/self.image.shape[1]))])
+        #     print(output.shape)
+        #     print(self.mask.shape)
 
+
+        #height == 0, widht == 1
+        mask_width = self.mask.shape[1]
+        mask_height = self.mask.shape[0]
+        image_width = self.image.shape[1]
+        image_height = self.image.shape[0]
+
+        if image_width/image_height < mask_width/mask_height:
+            new_height = self.mask.shape[0]
+            new_width = self.image.shape[1] * self.mask.shape[0]/self.image.shape[0]
         else:
-             output = cv2.resize(self.image, [self.mask.shape[1], int(self.image.shape[0]*(self.mask.shape[1]/self.image.shape[1]))])
-        output = cv2.copyMakeBorder(output, (self.mask.shape[0] - output.shape[0])//2, ceil((self.mask.shape[0] - output.shape[0])/2), (self.mask.shape[1] - output.shape[1])//2, ceil((self.mask.shape[1] - output.shape[1])/2), cv2.BORDER_CONSTANT,value=[1,1,1])
+            new_height = self.image.shape[0] * self.mask.shape[1]/self.image.shape[1]
+            new_width = self.mask.shape[1]
+
+        output = cv2.resize(self.image, [int(new_width), int(new_height)])
+        height_padding = abs((self.mask.shape[0] - output.shape[0])/2)
+        width_padding = abs((self.mask.shape[1] - output.shape[1])/2)
+
+        output = cv2.copyMakeBorder(output, top=floor(height_padding), bottom=ceil(height_padding), left=floor(width_padding), right=ceil(width_padding), borderType=cv2.BORDER_CONSTANT,value=[1,1,1])
         output[self.mask == 0] = (0,0,0)
         return output
+
 
     def get_masked_img(self):
         """
