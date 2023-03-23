@@ -1,7 +1,7 @@
 import sys
 from os import getcwd
 
-sys_path = getcwd()[:-2]
+sys_path = getcwd()
 sys.path.insert(1, sys_path)
 
 import tkinter as tk
