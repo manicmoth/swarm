@@ -150,11 +150,11 @@ class UserInterface():
         mask_list = self.segmenter.segment_image(im)
 
         for mask in mask_list:
-            print(mask)
+            mask = np.array(mask, dtype=np.int8)
             overlay = cv.imread("img/white_image.png")
             name = f"layer {len(self.layers)}"
-            new_layer = Image_Layer(image=overlay, mask=np.array(mask, dtype=np.int8), name=name, operation_type=Operation.RESIZE_STRETCH)
-            new_layer_wapper = LayerWidget(master=self.layers_widget.frame_layers, name=new_layer.name, layer_object=new_layer)
+            new_layer = Image_Layer(image=overlay, mask=mask, name=name, operation_type=Operation.RESIZE_STRETCH)
+            new_layer_wapper = LayerWidget(master=self.layers_widget.frame_layers, name=new_layer.name, layer_object=new_layer, update_function=self.update_background_callback)
             self.layers.append(new_layer_wapper)
         self.update_background_callback()
         self.layers_widget.update_layers(self.layers)
