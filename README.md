@@ -8,7 +8,8 @@ Overall
 - Numpy = 1.24.2
 
 Auto Segmentation
-- Detectron2 = 0.6 
+- Detectron2 = 0.6  
+    ([How to install Detectron2](https://detectron2.readthedocs.io/en/latest/tutorials/install.html))
 - PyTorch = 2.0.0
 - Torchvision = 0.15.0
 
