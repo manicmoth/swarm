@@ -1,5 +1,8 @@
 import sys
-sys.path.insert(1, '/Users/kat/Documents/moth/segmentation_testing/')
+from os import getcwd
+
+sys_path = getcwd()[:-2]
+sys.path.insert(1, sys_path)
 
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
