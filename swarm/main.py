@@ -1,4 +1,4 @@
-from detectron_segmenter import Segmenter
+from detectron_segmenter import DetectronSegmenter
 from cv2 import imread, imshow, waitKey
 from layer import Image_Layer
 from layer import Operation
@@ -6,7 +6,7 @@ from layer import Operation
 mask_img = imread("/Users/kat/Documents/moth/segmentation_testing/img/gaya.png")
 back_img = imread("/Users/kat/Documents/moth/segmentation_testing/img/flowers.jpeg")
 
-segmenter = Segmenter()
+segmenter = DetectronSegmenter()
 masks = segmenter.segment_image(mask_img)
 
 layer = Image_Layer(back_img, masks[0], operation_type=Operation.RESIZE_PADDING)

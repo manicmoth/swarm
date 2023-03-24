@@ -5,7 +5,7 @@ from detectron2.config import get_cfg
 from detectron2.utils.visualizer import Visualizer
 from detectron2.data import MetadataCatalog
 
-class Segmenter():
+class DetectronSegmenter():
     def __init__(self) -> None:
         self.cfg = get_cfg()
         self.cfg.MODEL.DEVICE = "cpu" ## mps or cuda depending on machine type

@@ -5,18 +5,15 @@ from os import getcwd
 
 class GrabCutSegmenter():
 
-    def __init__(self,) -> None:
+    def __init__(self) -> None:
         """
         Initializes segmenter, and performs first pass of grabcut segmentation 
         using a bounding box
         """
         # define vars
-        self.height, self.width = self.og_image.shape[:2]
-        self.mask = np.zeros(self.height, self.width, np.uint8)
         self.bgdModel = np.zeros((1,65),np.float64) 
         self.fgdModel = np.zeros((1,65),np.float64) 
-        # perform first grabcut
-        print("GrabCutSegmenter: all vars init")
+
 
     def rect_segment(self, im,rec_coords:tuple = ()):
         """
@@ -30,41 +27,38 @@ class GrabCutSegmenter():
         @return img - masked image size (n,m,3)
         """
         
-        if im == 0:
+        if not isinstance(im, np.ndarray):
             raise Exception("Please pass an img to the segmenter") 
         # self.img is reserved for output image
-        self.og_image = im
         if rec_coords == ():
             raise Exception("Please define a bounding rectangle")
+        
+        mask = np.zeros(im.shape[:2], np.uint8)
 
-        self.bounding_coords = rec_coords
-        cv.grabCut(self.og_image, self.mask, self.bounding_coords, 
-                   self.bgdModel,self.fgdModel,5,cv.GC_INIT_WITH_RECT)
-        self.mask2 = np.where((self.mask==2)|(self.mask==9),0,1).astype('uint8')
-        self.img = self.og_image*self.mask2[:,:,np.newaxis]
+        bounding_coords = rec_coords
+        new_mask, _, _ = cv.grabCut(im, mask, bounding_coords, self.bgdModel,self.fgdModel,5,cv.GC_INIT_WITH_RECT)
+        output_mask = np.where((new_mask==2)|(new_mask==9),0,1).astype('uint8')
+        output_im = im*output_mask[:,:,np.newaxis]
 
-        print("GrabCutSegmenter: rect_segment complete") 
-        return self.img 
+        return output_mask, output_im
 
-    def mask_segment(self,im, newMask):
+    def mask_segment(self,im, mask):
         '''
         Creates an updated mask of an object using grabCut segmentation and a 
         user defined mask. Assumes using the same image as rect_segment.
 
         @param im - cv image of size (3,n,m)
-        @param newMask - cv image of size (n,m,3)
+        @param mask - cv image of size (n,m,3)
         '''
-        if im == 0:
+        if not isinstance(im, np.ndarray):
             raise Exception("Please pass an img to the segmenter") 
-        self.og_image = im
         # toggle mask where there is black/white
-        self.mask[newMask == 255] = 1
-        self.mask[newMask == 0] = 0
+        self.mask[mask == 255] = 1
     
-        self.iMask, self.bgdModel,self.fgdModel = cv.grabCut(self.og_image,self.mask,None,self.bgdModel,self.fgdModel,5,cv.GC_INIT_WITH_MASK)
-        mask = np.where((self.mask==2)|(self.mask==0),0,1).astype('uint8')
-        self.img = self.og_image*mask[:,:,np.newaxis]
-        return self.img
+        new_mask, _, _ = cv.grabCut(im,mask,None,self.bgdModel,self.fgdModel,5,cv.GC_INIT_WITH_MASK)
+        output_mask = np.where((new_mask==2)|(new_mask==0),0,1).astype('uint8')
+        output_im = im*output_mask[:,:,np.newaxis]
+        return output_mask, output_im
 
 
 

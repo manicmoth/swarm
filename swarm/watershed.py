@@ -49,7 +49,7 @@ class WatershedSegmenter():
         self.markers[self.unknown==255]=0
         
         self.markers = cv.watershed(self.img,self.markers)
-        self.img[markers == -1] = [255,0,0]
+        self.img[self.markers == -1] = [255,0,0]
         
         # markers image should be clearly delinated from the background  
         # img should have borders between objects defined 
