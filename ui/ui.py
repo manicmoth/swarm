@@ -8,7 +8,7 @@ import tkinter as tk
 from tkinter.filedialog import askopenfilename
 from swarm.layer import Image_Layer
 from swarm.layer import Operation
-from swarm.detectron_segmenter import Segmenter
+from swarm.detectron_segmenter import DetectronSegmenter
 from helper_functions import open_image
 import cv2 as cv
 from PIL import ImageTk, Image  
@@ -19,7 +19,7 @@ from layer_list_widget import LayersList
 
 class UserInterface():
     def __init__(self) -> None:
-        self.segmenter = Segmenter()
+        self.segmenter = DetectronSegmenter()
         self.window = tk.Tk()
 
         self.window.rowconfigure(0, weight=1, minsize=400)
