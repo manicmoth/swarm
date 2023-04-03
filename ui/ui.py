@@ -6,7 +6,7 @@ sys.path.insert(1, sys_path)
 
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
-from swarm.layer import Image_Layer
+from swarm.layer import Layer
 from swarm.layer import Operation
 from swarm.detectron_segmenter import Segmenter
 from helper_functions import open_image
@@ -40,7 +40,7 @@ class UserInterface():
 
         #create background image with default background
         output_image = cv.imread("img/default_img.png")
-        self.background_layer = Image_Layer(image=output_image)
+        self.background_layer = Layer(base_object=output_image)
         output_image = ImageTk.PhotoImage(Image.fromarray(output_image))
         self.background = OutputImage(master=self.frame_output, output_image=output_image)
 
@@ -94,7 +94,7 @@ class UserInterface():
         self.window_new_layer=tk.Toplevel(self.window)
         self.window_new_layer.geometry("400x200")
         self.window_new_layer.title("New Layer")
-        self.new_layer = Image_Layer()
+        self.new_layer = Layer()
         
         #Create a label in Toplevel window
         self.button_layer_mask = tk.Button(master=self.window_new_layer, text="Select Layer Mask", command=self.open_mask_callback)
@@ -121,7 +121,7 @@ class UserInterface():
         label = tk.Label(master=self.window_new_layer, text=f"Mask image: {label_name}")
         label.pack()
         self.button_layer_mask["state"] = "disabled"
-        if not(self.new_layer.image is None) and not(self.new_layer.mask is None):
+        if not(self.new_layer.base_image is None) and not(self.new_layer.mask_image is None):
             self.button_activate_new_layer["state"] = "normal"
 
     def open_image_callback(self):
@@ -139,7 +139,7 @@ class UserInterface():
         label = tk.Label(master=self.window_new_layer, text=f"Layer image: {label_name}")
         label.pack()
         self.button_layer_image["state"] = "disabled"
-        if not(self.new_layer.image is None) and not(self.new_layer.mask is None):
+        if not(self.new_layer.base_image is None) and not(self.new_layer.mask_image is None):
             self.button_activate_new_layer["state"] = "normal"
 
     def close_new_layer_callback(self):
@@ -156,7 +156,7 @@ class UserInterface():
             mask = np.array(mask, dtype=np.int8)
             overlay = cv.imread("img/white_image.png")
             name = f"layer {len(self.layers)}"
-            new_layer = Image_Layer(image=overlay, mask=mask, name=name, operation_type=Operation.RESIZE_STRETCH)
+            new_layer = Layer(base_object=overlay, mask_image=mask, name=name, operation_type=Operation.RESIZE_STRETCH)
             new_layer_wapper = LayerWidget(master=self.layers_widget.frame_layers, name=new_layer.name, layer_object=new_layer, update_function=self.update_background_callback)
             self.layers.append(new_layer_wapper)
         self.update_background_callback()

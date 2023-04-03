@@ -27,13 +27,13 @@ class LayerWidget():
         self.label_edit_mask = None     
 
 
-        self.mask = Image.fromarray(layer_object.mask)
+        self.mask = Image.fromarray(layer_object.mask_image)
         self.mask.convert('RGB')
         self.mask.thumbnail([self.master.winfo_width(), 30])#mask.height])
 
         self.mask = ImageTk.PhotoImage(self.mask)
 
-        self.overlay = Image.fromarray(cv.cvtColor(layer_object.image, cv.COLOR_BGR2RGB))
+        self.overlay = Image.fromarray(cv.cvtColor(layer_object.base_image, cv.COLOR_BGR2RGB))
         self.overlay.thumbnail([self.master.winfo_width(), 30])#overlay.height])
         self.overlay = ImageTk.PhotoImage(self.overlay)
 
