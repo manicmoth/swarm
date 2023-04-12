@@ -9,7 +9,7 @@ from tkinter.filedialog import askopenfilename
 from swarm.layer import Layer
 from swarm.layer import Operation
 from swarm.detectron_segmenter import Segmenter
-from helper_functions import open_image
+from helper_functions import open_file, open_image
 import cv2 as cv
 from PIL import ImageTk, Image  
 import numpy as np 
@@ -95,7 +95,7 @@ class UserInterface():
         self.window_new_layer.geometry("400x200")
         self.window_new_layer.title("New Layer")
         self.new_layer = Layer()
-        
+
         #Create a label in Toplevel window
         self.button_layer_mask = tk.Button(master=self.window_new_layer, text="Select Layer Mask", command=self.open_mask_callback)
         self.button_layer_mask.pack()
@@ -128,7 +128,7 @@ class UserInterface():
         """
         Opens layer image
         """
-        filename = open_image("Select Layer Image")
+        filename = open_file("Select Layer Image")
         image = cv.imread(filename)
         self.new_layer.update_image(image)
         name = filename.split("/")[-1].split(".")[0]
