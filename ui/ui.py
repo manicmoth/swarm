@@ -155,6 +155,7 @@ class UserInterface():
     def segment_image_callback(self):
         impath = open_image()
         im = cv.imread(impath)
+        print(im)
         mask_list = self.segmenter.segment_image(im)
 
         for mask in mask_list:
