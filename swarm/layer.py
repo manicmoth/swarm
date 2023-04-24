@@ -108,10 +108,13 @@ class Layer():
         """
         self.base_video.set(cv2.CAP_PROP_POS_FRAMES, 0)
         masked_output_video = []
-        while cv2.isOpened(self.output_video):
+        last_frame_num = self.base_video.get(cv2.CAP_PROP_FRAME_COUNT)
+        count = 0
+        while count < last_frame_num:
             _, frame = self.output_video.read()
             output = apply_mask(self.mask_image, frame, self.operation_type)
             masked_output_video.append(output)
+            count += 1 
         return masked_output_video
 
 
