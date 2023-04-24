@@ -1,6 +1,5 @@
 from enum import Enum
 import cv2
-from copy import deepcopy
 from helper_functions import apply_mask, Operation
 
 
@@ -21,8 +20,8 @@ class Layer():
         #check layer type
         if base_video is not None:
             self.base_video = base_video
-            base_video_copy = deepcopy(base_video)
-            _, frame = base_video_copy.read()
+            _, frame = base_video.read()
+            self.base_video.set(cv2.CAP_PROP_POS_FRAMES, 0)
             self.base_image = frame
             self.layer_type = LayerType.VIDEO
         elif base_image is not None:
@@ -81,9 +80,10 @@ class Layer():
         Get new image and apply mask if available
         """
         self.base_video = new_vid
-        base_video_copy = deepcopy(new_vid)
-        _, frame = base_video_copy.read()
-        self.base_image = frame
+        _, frame = self.base_video.read()
+        self.base_image = frame        
+        self.base_video.set(cv2.CAP_PROP_POS_FRAMES, 0)
+
 
         if not(self.mask_image is None):
             self.output_image = apply_mask(self.mask_image, self.base_image, self.operation_type)
@@ -106,10 +106,10 @@ class Layer():
         """
         Return masked list of frames
         """
+        self.base_video.set(cv2.CAP_PROP_POS_FRAMES, 0)
         masked_output_video = []
-        output_video_copy = deepcopy(self.output_video)
-        while cv2.isOpened(output_video_copy):
-            _, frame = output_video_copy.read()
+        while cv2.isOpened(self.output_video):
+            _, frame = self.output_video.read()
             output = apply_mask(self.mask_image, frame, self.operation_type)
             masked_output_video.append(output)
         return masked_output_video
