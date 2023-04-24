@@ -38,11 +38,16 @@ class UserInterface():
         self.button_choose_background = tk.Button(master=self.frame_output, text="Choose Background Image", command=self.choose_background_callback)
         self.button_choose_background.pack()
 
+        self.button_download_output = tk.Button(master=self.frame_output, text="Download Output", command=self.download_output_callback)
+        self.button_download_output.pack()
+
         #create background image with default background
         output_image = cv.imread("img/default_img.png")
         self.background_layer = Image_Layer(image=output_image)
-        output_image = ImageTk.PhotoImage(Image.fromarray(output_image))
+        self.output_image = (Image.fromarray(output_image))
+        output_image =  ImageTk.PhotoImage(self.output_image)
         self.background = OutputImage(master=self.frame_output, output_image=output_image)
+
 
         #create frame for layers
         self.frame_layers = tk.Frame(
@@ -195,8 +200,12 @@ class UserInterface():
         resize_pil = Image.fromarray(cv.cvtColor(output, cv.COLOR_BGR2RGB))
         size = (self.background.get_dimensions()[0], self.background.get_dimensions()[1])
         resize_pil.thumbnail(size)
+        self.output_image = resize_pil
         resize_pil = ImageTk.PhotoImage(resize_pil)
         self.background.update_image(resize_pil)
+
+    def download_output_callback(self):
+        self.output_image.save("output.png")
 
 
     def sum_images(self):
