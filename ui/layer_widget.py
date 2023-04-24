@@ -22,6 +22,8 @@ class LayerWidget():
         self.label_frame_name = tk.Label(master=self.frame_layer,text=self.name) 
         self.button_edit = tk.Button(master=self.frame_layer, text="Edit Layer", command=self.edit_layer_callback)
            
+        self.button_enable = tk.Button(master=self.frame_layer, text="Hide", command=self.enable_callback)
+
         self.window_edit_layer = None
         self.label_edit_overlay = None
         self.label_edit_mask = None     
@@ -44,6 +46,8 @@ class LayerWidget():
         self.button_edit.grid(row=0,column=1, columnspan = 1, padx=5,pady=5, sticky="ne")       
         self.image_mask.grid(row=0,column=2, columnspan = 1, padx=5,pady=5, sticky="ne")       
         self.image_overlay.grid(row=0,column=3, columnspan = 1, padx=5,pady=5, sticky="ne")  
+        self.button_enable.grid(row=0,column=4, columnspan = 1, padx=5,pady=5, sticky="ne")  
+
 
         self.holder_image = None
 
@@ -112,3 +116,12 @@ class LayerWidget():
         self.button_edit["state"] = "normal"
         self.window_edit_layer.destroy()
 
+
+    def enable_callback(self):
+        if self.layer_object.enabled:
+            self.layer_object.enabled = False
+            self.button_enable.config(text="Show", background="Green")
+        else:
+            self.layer_object.enabled = True
+            self.button_enable.config(text="Hide", background="White")
+        self.update_function()

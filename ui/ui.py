@@ -192,8 +192,9 @@ class UserInterface():
         if len(self.layers) > 0:
             output_mask = cv.resize(output_mask, [self.layers[0].layer_object.mask.shape[1], self.layers[0].layer_object.mask.shape[0]])
             for layer in self.layers:
-                mask = cv.resize(layer.layer_object.mask, [self.layers[0].layer_object.mask.shape[1], self.layers[0].layer_object.mask.shape[0]])
-                output_mask = np.add(output_mask, mask)
+                if layer.layer_object.enabled:
+                    mask = cv.resize(layer.layer_object.mask, [self.layers[0].layer_object.mask.shape[1], self.layers[0].layer_object.mask.shape[0]])
+                    output_mask = np.add(output_mask, mask)
         output_mask = np.logical_not(output_mask).astype(int)
         self.background_layer.update_mask(output_mask)
         output = self.sum_images()
@@ -214,8 +215,9 @@ class UserInterface():
         if len(self.layers) > 0:
             output = cv.resize(output, [self.layers[0].layer_object.mask.shape[1], self.layers[0].layer_object.mask.shape[0]])
         for layer in self.layers:
-            image = cv.resize(layer.layer_object.get_masked_img(), [self.layers[0].layer_object.mask.shape[1], self.layers[0].layer_object.mask.shape[0]])
-            output = np.add(output, image)
+            if layer.layer_object.enabled:
+                image = cv.resize(layer.layer_object.get_masked_img(), [self.layers[0].layer_object.mask.shape[1], self.layers[0].layer_object.mask.shape[0]])
+                output = np.add(output, image)
         output = np.add(output, self.background_layer.get_masked_img())
         return output
 

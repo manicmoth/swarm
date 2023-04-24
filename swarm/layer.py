@@ -17,6 +17,7 @@ class Image_Layer():
         """
         self.operation_type = operation_type
         self.image = image
+        self.enabled = True
 
         self.mask = None
         if not(mask is None):
