@@ -3,6 +3,7 @@ from PIL import ImageTk, Image
 import cv2 as cv
 import numpy as np
 from helper_functions import open_image
+from layer_edit_widget import LayerEditWidget
 
 
 class LayerWidget():
@@ -20,8 +21,9 @@ class LayerWidget():
 
 
         self.label_frame_name = tk.Label(master=self.frame_layer,text=self.name) 
-        self.button_edit = tk.Button(master=self.frame_layer, text="Edit Layer", command=self.edit_layer_callback)
-           
+        self.button_edit = tk.Button(master=self.frame_layer, text="New Image", command=self.edit_layer_callback)
+        self.button_adjust = tk.Button(master=self.frame_layer, text="Adjust", command=self.adjust_layer_callback)
+
         self.button_enable = tk.Button(master=self.frame_layer, text="Hide", command=self.enable_callback)
 
         self.window_edit_layer = None
@@ -29,9 +31,10 @@ class LayerWidget():
         self.label_edit_mask = None     
 
 
-        self.mask = Image.fromarray(layer_object.mask)
+        self.mask = Image.fromarray(self.layer_object.mask)
         self.mask.convert('RGB')
         self.mask.thumbnail([self.master.winfo_width(), 30])#mask.height])
+
 
         self.mask = ImageTk.PhotoImage(self.mask)
 
@@ -43,10 +46,11 @@ class LayerWidget():
         self.image_overlay = tk.Label(master=self.frame_layer, image=self.overlay)
 
         self.label_frame_name.grid(row=0,column=0, columnspan = 1, padx=5,pady=5, sticky="ne") 
-        self.button_edit.grid(row=0,column=1, columnspan = 1, padx=5,pady=5, sticky="ne")       
-        self.image_mask.grid(row=0,column=2, columnspan = 1, padx=5,pady=5, sticky="ne")       
-        self.image_overlay.grid(row=0,column=3, columnspan = 1, padx=5,pady=5, sticky="ne")  
-        self.button_enable.grid(row=0,column=4, columnspan = 1, padx=5,pady=5, sticky="ne")  
+        self.image_mask.grid(row=0,column=1, columnspan = 1, padx=5,pady=5, sticky="ne")       
+        self.image_overlay.grid(row=0,column=2, columnspan = 1, padx=5,pady=5, sticky="ne")  
+        self.button_adjust.grid(row=1,column=0, columnspan=1, padx=5, pady=5, sticky="ne")
+        self.button_edit.grid(row=1,column=1, columnspan = 1, padx=5,pady=5, sticky="ne")       
+        self.button_enable.grid(row=1,column=2, columnspan = 1, padx=5,pady=5, sticky="ne")  
 
 
         self.holder_image = None
@@ -77,11 +81,21 @@ class LayerWidget():
         self.button_cancel_edit_layer = tk.Button(master=self.window_edit_layer, text="Cancel", command=self.close_new_layer_callback)
         self.button_cancel_edit_layer.pack()
 
+    def adjust_layer_callback(self):
+        self.layer_edit_window = LayerEditWidget(master=self.master, 
+                                                 layer_object=self.layer_object, 
+                                                 update_function=self.update_function, 
+                                                 call_button=self.button_adjust)
+
+
+
+
     def open_image_callback(self):
         holder_image_path = open_image("Choose new overlay")
         self.holder_image = cv.imread(holder_image_path)
         self.label_image_name.configure(text=holder_image_path)
         self.label_image_name.image=holder_image_path
+        self.label_image_name.original_image=holder_image_path
         self.button_activate_edit_layer["state"] = "normal"
 
     def push_edit_layer_callback(self):
@@ -94,6 +108,7 @@ class LayerWidget():
 
         #reset state
         self.layer_object.update_image(self.holder_image)
+        self.layer_object.original_image = self.holder_image 
 
 
         self.overlay = Image.fromarray(cv.cvtColor(self.layer_object.image, cv.COLOR_BGR2RGB))

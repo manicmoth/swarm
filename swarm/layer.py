@@ -16,6 +16,7 @@ class Image_Layer():
         operation_type - how the image is related to the mask - see Operation for possible types
         """
         self.operation_type = operation_type
+        self.original_image = image
         self.image = image
         self.enabled = True
 

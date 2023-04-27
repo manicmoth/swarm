@@ -49,14 +49,26 @@ class UserInterface():
         self.background = OutputImage(master=self.frame_output, output_image=output_image)
 
 
-        #create frame for layers
+        self.frame_layer_wrapper = tk.Frame(self.window)
+        self.frame_layer_wrapper.grid(row=0, column=2, columnspan = 1, padx=5,pady=5, sticky="nsew")
+
+        # canvas
+        self.canvas_layers = tk.Canvas(self.frame_layer_wrapper)
+        self.canvas_layers.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+
+        # scrollbar
+        self.scrollbar = tk.Scrollbar(self.frame_layer_wrapper, orient=tk.VERTICAL, command=self.canvas_layers.yview)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y) 
+
+        self.canvas_layers.configure(yscrollcommand=self.scrollbar.set)
+        self.canvas_layers.bind('<Configure>', lambda e: self.canvas_layers.configure(scrollregion=self.canvas_layers.bbox("all")))
+
         self.frame_layers = tk.Frame(
-            master=self.window,
+            master=self.canvas_layers,
             relief=tk.RAISED,
             borderwidth=1,
         )
-        #define width of frame
-        self.frame_layers.grid(row=0, column=2, padx=5,pady=5, sticky="nsew")
+        self.canvas_layers.create_window((0, 0), window=self.frame_layers, anchor="nw")
         #set header test
         self.label_layers = tk.Label(master=self.frame_layers, text=f"Layer list")
         self.label_layers.pack()
@@ -160,7 +172,7 @@ class UserInterface():
 
         for mask in mask_list:
             mask = np.array(mask, dtype=np.int8)
-            overlay = cv.imread("img/white_image.png")
+            overlay = cv.imread("img/swirl.jpg")#"img/white_image.png")
             name = f"layer {len(self.layers)}"
             new_layer = Image_Layer(image=overlay, mask=mask, name=name, operation_type=Operation.RESIZE_STRETCH)
             new_layer_wapper = LayerWidget(master=self.layers_widget.frame_layers, name=new_layer.name, layer_object=new_layer, update_function=self.update_background_callback)
@@ -173,7 +185,7 @@ class UserInterface():
         Runs when new layer is added - adds layer to list and updates background image accordingly
         """
         #Create new layer wrapper widget
-        new_layer = LayerWidget(self.layers_widget.frame_layers, self.new_layer.name, self.new_layer)
+        new_layer = LayerWidget(self.layers_widget.frame_layers, self.new_layer.name, self.new_layer, update_function=self.update_background_callback)
 
         #Add new layer to list and update view
         self.layers.append(new_layer)
