@@ -6,7 +6,7 @@ class LayersList():
             master=master,
             relief=tk.RAISED,
             borderwidth=1,
-            background="red"
+            background="#436764"
         )
         self.frame_layers.pack(fill="both", expand=True)
 

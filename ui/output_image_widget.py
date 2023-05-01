@@ -10,7 +10,7 @@ class OutputImage():
             master=master,
             relief=tk.RAISED,
             borderwidth=1,
-            background="blue"
+            background="#436764"
         )
         self.frame_output_image.pack()
 

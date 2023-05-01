@@ -9,7 +9,7 @@ from tkinter.filedialog import askopenfilename
 from swarm.layer import Image_Layer
 from swarm.layer import Operation
 from swarm.detectron_segmenter import Segmenter
-from helper_functions import open_image
+from helper_functions import open_image, accent_color
 import cv2 as cv
 from PIL import ImageTk, Image  
 import numpy as np 
@@ -30,7 +30,7 @@ class UserInterface():
             master=self.window,
             relief=tk.RAISED,
             borderwidth=1,
-            background="blue",
+            background=accent_color,
         )
         self.frame_output.grid(row=0, column=0, columnspan = 2, padx=5,pady=5, sticky="nsew")
 
@@ -42,7 +42,7 @@ class UserInterface():
         self.button_download_output.pack()
 
         #create background image with default background
-        output_image = cv.imread("img/default_img.png")
+        output_image = cv.imread("img/black_image.png")
         self.background_layer = Image_Layer(image=output_image)
         self.output_image = (Image.fromarray(output_image))
         output_image =  ImageTk.PhotoImage(self.output_image)
@@ -172,7 +172,7 @@ class UserInterface():
 
         for mask in mask_list:
             mask = np.array(mask, dtype=np.int8)
-            overlay = cv.imread("img/swirl.jpg")#"img/white_image.png")
+            overlay = cv.imread("img/white_image.png")
             name = f"layer {len(self.layers)}"
             new_layer = Image_Layer(image=overlay, mask=mask, name=name, operation_type=Operation.RESIZE_STRETCH)
             new_layer_wapper = LayerWidget(master=self.layers_widget.frame_layers, name=new_layer.name, layer_object=new_layer, update_function=self.update_background_callback)

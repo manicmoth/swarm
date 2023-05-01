@@ -2,7 +2,7 @@ import tkinter as tk
 from PIL import ImageTk, Image  
 import cv2 as cv
 import numpy as np
-from helper_functions import open_image
+from helper_functions import open_image, accent_color
 from layer_edit_widget import LayerEditWidget
 
 
@@ -16,34 +16,33 @@ class LayerWidget():
             master=master,
             relief=tk.RAISED,
             borderwidth=1,
-            background="white"
+            background=accent_color
         )
 
 
-        self.label_frame_name = tk.Label(master=self.frame_layer,text=self.name) 
-        self.button_edit = tk.Button(master=self.frame_layer, text="New Image", command=self.edit_layer_callback)
-        self.button_adjust = tk.Button(master=self.frame_layer, text="Adjust", command=self.adjust_layer_callback)
-
-        self.button_enable = tk.Button(master=self.frame_layer, text="Hide", command=self.enable_callback)
+        self.label_frame_name = tk.Label(master=self.frame_layer, background=accent_color, fg="white", text=self.name) 
+        self.button_edit = tk.Button(master=self.frame_layer, text="New Image", highlightbackground=accent_color, command=self.edit_layer_callback)
+        self.button_adjust = tk.Button(master=self.frame_layer, text="Adjust", highlightbackground=accent_color,command=self.adjust_layer_callback)
+        self.button_enable = tk.Button(master=self.frame_layer, text="Hide", highlightbackground=accent_color, command=self.enable_callback)
 
         self.window_edit_layer = None
         self.label_edit_overlay = None
         self.label_edit_mask = None     
 
-
-        self.mask = Image.fromarray(self.layer_object.mask)
+        print(self.layer_object.mask)
+        self.mask = Image.fromarray(self.layer_object.mask * 256)
         self.mask.convert('RGB')
         self.mask.thumbnail([self.master.winfo_width(), 30])#mask.height])
 
 
-        self.mask = ImageTk.PhotoImage(self.mask)
+        self.mask_tk = ImageTk.PhotoImage(self.mask)
 
         self.overlay = Image.fromarray(cv.cvtColor(layer_object.image, cv.COLOR_BGR2RGB))
         self.overlay.thumbnail([self.master.winfo_width(), 30])#overlay.height])
-        self.overlay = ImageTk.PhotoImage(self.overlay)
+        self.overlay_tk = ImageTk.PhotoImage(self.overlay)
 
-        self.image_mask = tk.Label(master=self.frame_layer, image=self.mask)
-        self.image_overlay = tk.Label(master=self.frame_layer, image=self.overlay)
+        self.image_mask = tk.Label(master=self.frame_layer, image=self.mask_tk)
+        self.image_overlay = tk.Label(master=self.frame_layer, image=self.overlay_tk)
 
         self.label_frame_name.grid(row=0,column=0, columnspan = 1, padx=5,pady=5, sticky="ne") 
         self.image_mask.grid(row=0,column=1, columnspan = 1, padx=5,pady=5, sticky="ne")       
@@ -113,9 +112,9 @@ class LayerWidget():
 
         self.overlay = Image.fromarray(cv.cvtColor(self.layer_object.image, cv.COLOR_BGR2RGB))
         self.overlay.thumbnail([self.master.winfo_width(), 30])#overlay.height])
-        self.overlay = ImageTk.PhotoImage(self.overlay)
-        self.image_overlay.configure(image=self.overlay)
-        self.image_overlay.image=self.overlay
+        self.overlay_tk = ImageTk.PhotoImage(self.overlay)
+        self.image_overlay.configure(image=self.overlay_tk)
+        self.image_overlay.image=self.overlay_tk
 
 
         self.holder_image = None
